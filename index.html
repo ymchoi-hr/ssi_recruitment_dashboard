@@ -28,10 +28,10 @@
     align-items: center;
     margin-bottom: 15px;
   }
-  .table-title h2 { font-size: 20px; color: #1a2b4a; }
-  .add-row-btn {
+  .table-title h2 { font-size: 16px; color: #1a2b4a; }
+  .title-actions { display: flex; gap: 8px; }
+  .add-row-btn, .print-btn {
     padding: 8px 16px;
-    background: #27ae60;
     color: #fff;
     border: none;
     border-radius: 5px;
@@ -39,12 +39,15 @@
     font-size: 13px;
     font-weight: 600;
   }
+  .add-row-btn { background: #27ae60; }
   .add-row-btn:hover { background: #229954; }
+  .print-btn { background: #34495e; }
+  .print-btn:hover { background: #2c3e50; }
 
   table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 1750px;
+    min-width: 1700px;
   }
   thead tr.process-row th {
     background: #ecf0f1;
@@ -157,15 +160,30 @@
   }
   .input-with-unit input.warn:placeholder-shown ~ .unit { color: #f5b7b1; }
 
-  tbody input[type="date"] { width: 100%; }
+  /* 날짜 컨테이너 및 닷 포맷 보정용 */
+  .date-container {
+    position: relative;
+    width: 100%;
+  }
+  .date-text {
+    display: none;
+    font-size: 12px;
+    color: #2c3e50;
+    text-align: center;
+    width: 100%;
+  }
+  tbody input[type="date"] { 
+    width: 100%; 
+  }
 
+  /* 포지션 셀 전체 가로 배치 구조 (너비 80% 축소 반영) */
   tbody td.position-cell {
     text-align: left;
     background: #f8fafc;
     position: sticky;
     left: 0;
     z-index: 1;
-    min-width: 340px;
+    min-width: 270px;
     border-right: 2px solid #b0b9c1 !important;
     padding: 8px;
   }
@@ -173,7 +191,7 @@
     position: sticky;
     left: 0;
     z-index: 2;
-    min-width: 340px;
+    min-width: 270px;
     text-align: center !important;
     border-right: 2px solid #b0b9c1 !important;
     background: #ecf0f1;
@@ -185,8 +203,9 @@
 
   .pos-row {
     display: flex;
-    gap: 5px;
+    gap: 8px;
     align-items: center;
+    width: 100%;
   }
   .row-number {
     flex: 0 0 22px;
@@ -200,50 +219,82 @@
     font-size: 11px;
     font-weight: 600;
   }
+  .pos-left-cols {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex-shrink: 0;
+  }
+  /* 팀/포지션/직급 입력란 너비 현재의 80% 규격으로 축소 보정 */
   .pos-row input.pos-input {
-    flex: 1;
+    flex: 0 1 140px; 
     text-align: left;
     font-weight: 500;
     font-size: 12px;
     padding: 5px;
     min-width: 0;
+    border: 1px solid #d5dbe0;
+    background: #fff;
+    border-radius: 3px;
+  }
+  .pos-row input.pos-input:focus {
+    outline: none;
+    border-color: #3498db;
   }
 
-  .type-select {
-    padding: 4px 4px !important;
-    border-radius: 4px !important;
-    font-size: 10px !important;
-    font-weight: 700;
-    color: #fff !important;
-    border: none !important;
-    cursor: pointer;
-    width: 54px !important;
-    text-align: center !important;
-    text-align-last: center;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;
-  }
-  .type-select.public { background: #2980b9 !important; }
-  .type-select.direct { background: #8e44ad !important; }
-
-  tbody td.note-cell { border-right: 2px solid #b0b9c1 !important; }
-  thead th.note-th  { border-right: 2px solid #b0b9c1 !important; }
-
-  .status-select {
-    padding: 4px 4px !important;
-    border-radius: 10px !important;
-    font-size: 10px !important;
-    font-weight: 600;
-    color: #fff !important;
-    border: none !important;
-    cursor: pointer;
+  .type-select, .status-select {
     width: 58px !important;
     text-align: center !important;
     text-align-last: center;
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
+    cursor: pointer;
+    border: none !important;
+  }
+  .type-select {
+    padding: 3px 4px !important;
+    border-radius: 4px !important;
+    font-size: 10px !important;
+    font-weight: 700;
+    color: #fff !important;
+  }
+  .type-select.public { background: #2980b9 !important; }
+  .type-select.direct { background: #8e44ad !important; }
+
+  /* 비고(특이사항) 컬럼 구조 */
+  tbody td.note-cell {
+    border-right: 2px solid #b0b9c1 !important;
+    min-width: 120px;
+    max-width: 160px;
+  }
+  thead th.note-th  {
+    border-right: 2px solid #b0b9c1 !important;
+    min-width: 120px;
+    max-width: 160px;
+  }
+  tbody td.note-cell textarea {
+    width: 100%;
+    min-width: 110px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    padding: 5px;
+    font-size: 12px;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 34px;
+    background: transparent;
+    overflow-y: hidden;
+  }
+  tbody td.note-cell textarea:hover { border-color: #d5dbe0; background: #fff; }
+  tbody td.note-cell textarea:focus { outline: none; border-color: #3498db; background: #fff; }
+
+  .status-select {
+    padding: 3px 4px !important;
+    border-radius: 10px !important;
+    font-size: 10px !important;
+    font-weight: 600;
+    color: #fff !important;
   }
   .status-select.ongoing { background: #3498db !important; }
   .status-select.done    { background: #27ae60 !important; }
@@ -260,21 +311,6 @@
     border-radius: 3px;
   }
   .del-btn:hover { background: #fadbd8; }
-
-  tbody td.note-cell textarea {
-    width: 100%;
-    min-width: 160px;
-    border: 1px solid transparent;
-    border-radius: 3px;
-    padding: 5px;
-    font-size: 12px;
-    font-family: inherit;
-    resize: vertical;
-    min-height: 30px;
-    background: transparent;
-  }
-  tbody td.note-cell textarea:hover { border-color: #d5dbe0; background: #fff; }
-  tbody td.note-cell textarea:focus { outline: none; border-color: #3498db; background: #fff; }
 
   .legend {
     margin-top: 12px;
@@ -313,6 +349,190 @@
     color: #95a5a6;
     border-top: 1px solid #e0e4e8;
   }
+
+  /* ===================== 프린트 전용 스타일 ===================== */
+  @media print {
+    @page {
+      size: auto;
+      margin: 8mm;
+    }
+
+    body {
+      background: #fff !important;
+      padding: 0 !important;
+      margin: 0 !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    .title-actions, .del-btn, .add-row-btn, .print-btn {
+      display: none !important;
+    }
+    th:last-child, td:last-child {
+      display: none !important;
+    }
+
+    h1 {
+      font-size: 16pt;
+      margin: 0 0 6mm 0;
+    }
+
+    .table-wrap {
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      padding: 0 !important;
+      overflow: visible !important;
+    }
+    .table-title h2 { font-size: 12pt; }
+
+    table {
+      width: 100% !important;
+      min-width: 0 !important;
+      table-layout: fixed;
+      font-size: 8pt;
+      border: 1px solid #999;
+    }
+
+    thead { display: table-header-group; }
+    tr { page-break-inside: avoid; }
+
+    thead tr.process-row th,
+    thead tr.sub-row th {
+      padding: 4px 2px !important;
+      font-size: 7pt !important;
+      white-space: normal;
+      border: 1px solid #999 !important;
+    }
+    .step-circle {
+      width: 18px; height: 18px;
+      line-height: 18px;
+      font-size: 9pt;
+      margin: 0 auto 2px;
+    }
+
+    tbody td {
+      padding: 3px 1px !important;
+      border: 1px solid #ccc !important;
+      vertical-align: middle;
+    }
+
+    tbody td.position-cell,
+    thead th.position-th {
+      position: static !important;
+      min-width: 195px !important; 
+      width: 195px !important;
+    }
+    thead th.position-th {
+      font-size: 9pt !important;
+      padding: 6px 4px !important;
+    }
+    tbody td.note-cell,
+    thead th.note-th {
+      min-width: 0 !important;
+      max-width: none !important;
+    }
+
+    .pos-row {
+      display: flex !important;
+      gap: 6px !important;
+      align-items: center !important;
+      width: 100% !important;
+    }
+    .pos-left-cols {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 2px !important;
+    }
+    .pos-row input.pos-input {
+      flex: 1 !important;
+      text-align: left !important;
+      display: inline-block !important;
+      width: auto !important;
+      border: none !important;
+      background: transparent !important;
+      padding: 0 !important;
+    }
+
+    tbody input, tbody select {
+      border: none !important;
+      background: transparent !important;
+      padding: 0 !important;
+      font-size: 8pt !important;
+      color: #000 !important;
+      width: 100% !important;
+    }
+
+    /* 인쇄 시 날짜를 연도.월.일 텍스트 형태로 전환출력 */
+    tbody input[type="date"] {
+      display: none !important;
+    }
+    .date-text {
+      display: block !important;
+      font-size: 7.5pt !important;
+      letter-spacing: -0.3px !important;
+    }
+
+    /* 특이사항 장문 기재 시 안 잘리고 자동 개행 전량 노출 */
+    tbody td.note-cell textarea {
+      display: none !important;
+    }
+    .print-note-text {
+      display: block !important;
+      text-align: left !important;
+      font-size: 7.5pt !important;
+      white-space: pre-wrap !important;
+      word-break: break-all !important;
+      padding: 2px !important;
+    }
+
+    .input-with-unit {
+      display: inline-flex !important;
+      justify-content: center !important;
+      align-items: baseline !important;
+      width: auto !important;
+      white-space: nowrap !important;
+    }
+    .input-with-unit input { 
+      width: 26px !important; 
+      text-align: right !important;
+      display: inline-block !important;
+    }
+    .unit {
+      display: inline-block !important;
+      margin-left: 1px !important;
+    }
+
+    tbody input.auto-calc {
+      background: #f0f9f3 !important;
+      color: #1e8449 !important;
+    }
+    tbody input.auto-calc.warn {
+      background: #fdecea !important;
+      color: #c0392b !important;
+    }
+
+    .type-select, .status-select {
+      width: auto !important;
+      padding: 1px 4px !important;
+      font-size: 7pt !important;
+      display: inline-block !important;
+    }
+    .row-number {
+      width: 14px; height: 14px;
+      line-height: 14px;
+      font-size: 7pt;
+      display: inline-block !important;
+      flex: 0 0 14px !important;
+    }
+
+    .legend, footer { font-size: 8pt; }
+    footer { border: none; margin-top: 10mm; }
+  }
+
+  /* 화면용 보이지 않는 출력 전용 프리뷰 엘리먼트 */
+  .print-note-text {
+    display: none;
+  }
 </style>
 </head>
 <body>
@@ -322,7 +542,10 @@
 <div class="table-wrap">
   <div class="table-title">
     <h2>포지션별 진행 현황</h2>
-    <button class="add-row-btn" onclick="addRow()">+ 포지션 추가</button>
+    <div class="title-actions">
+      <button class="print-btn" onclick="openPrintView()">🖨 인쇄</button>
+      <button class="add-row-btn" onclick="addRow()">+ 포지션 추가</button>
+    </div>
   </div>
 
   <table>
@@ -330,8 +553,8 @@
       <tr class="process-row">
         <th class="position-th" rowspan="2">포지션 정보</th>
         <th colspan="1"><div class="step-circle c-jd">1</div>채용요청</th>
-        <th class="step-end" colspan="1"><div class="step-circle c-jd">2</div>JD 검토·미팅</th>
-        <th class="step-end" colspan="1"><div class="step-circle c-post">3</div>공고 게시 / 소싱</th>
+        <th class="step-end" colspan="1"><div class="step-circle c-jd">2</div>JD 확정</th>
+        <th class="step-end" colspan="1"><div class="step-circle c-post">3</div>공고 게시/소싱</th>
         <th class="step-end" colspan="2"><div class="step-circle c-doc">4</div>서류 검토</th>
         <th class="step-end" colspan="5"><div class="step-circle c-int1">5</div>1차 인터뷰</th>
         <th class="step-end" colspan="5"><div class="step-circle c-int2">6</div>2차 인터뷰</th>
@@ -343,20 +566,20 @@
       <tr class="sub-row">
         <th>요청일</th>
         <th class="step-end">소요기간</th>
-        <th class="step-end">진행 기간</th>
-        <th>지원자 / 후보자</th>
-        <th class="step-end">서류 합격자</th>
+        <th class="step-end">진행기간</th>
+        <th>지원자/후보자</th>
+        <th class="step-end">합격자</th>
         <th>참여자</th>
         <th>불참율</th>
         <th>합격자</th>
         <th>합격율</th>
-        <th class="step-end">평균 통보일</th>
+        <th class="step-end">평균통보기간</th>
         <th>참여자</th>
         <th>참여율</th>
         <th>합격자</th>
         <th>합격율</th>
-        <th class="step-end">평균 통보일</th>
-        <th class="step-end">평균 기간</th>
+        <th class="step-end">평균통보기간</th>
+        <th class="step-end">평균조율기간</th>
         <th class="step-end">입사(예정)일</th>
       </tr>
     </thead>
@@ -365,7 +588,7 @@
 
   <div class="legend">
     <div class="legend-item"><span class="legend-badge" style="background:#2980b9;">공개</span>공개 채용</div>
-    <div class="legend-item"><span class="legend-badge" style="background:#8e44ad;">다이렉트</span>다이렉트 소싱</div>
+    <div class="legend-item"><span class="legend-badge" style="background:#8e44ad;">소싱</span>다이렉트 소싱(인재경영실)</div>
     <div class="legend-item">&nbsp;|&nbsp;</div>
     <div class="legend-item"><span class="legend-dot" style="background:#8e44ad;"></span>채용요청</div>
     <div class="legend-item"><span class="legend-dot" style="background:#e74c3c;"></span>공고/소싱</div>
@@ -377,7 +600,7 @@
     <div class="legend-item">
       <span class="legend-cell" style="background:#f0f9f3; border:1px solid #d4ebd9;"></span>
       <span class="legend-cell" style="background:#fdecea; border:1px solid #f5b7b1;"></span>
-      자동 계산 셀
+      자동 계산 셀 (입력 불가)
     </div>
   </div>
 </div>
@@ -417,6 +640,25 @@ function clampNonNeg(input) {
   if (input.value !== "" && parseFloat(input.value) < 0) input.value = 0;
 }
 
+function formatDateToDot(el) {
+  const container = el.closest('.date-container');
+  const txtEl = container.querySelector('.date-text');
+  if(el.value) {
+    const parts = el.value.split('-');
+    if(parts.length === 3) {
+      txtEl.textContent = `${parts[0]}.${parts[1]}.${parts[2]}`;
+      return;
+    }
+  }
+  txtEl.textContent = '';
+}
+
+function syncTextarea(el) {
+  const container = el.closest('.note-cell');
+  const printTxtEl = container.querySelector('.print-note-text');
+  printTxtEl.textContent = el.value;
+}
+
 function addRow() {
   const tbody = document.getElementById("tbody");
   const tr = document.createElement("tr");
@@ -424,20 +666,27 @@ function addRow() {
     <td class="position-cell">
       <div class="pos-row">
         <span class="row-number"></span>
-        <select class="type-select public" onchange="updateType(this)">
-          <option value="public">공개</option>
-          <option value="direct">다이렉트</option>
-        </select>
+        <div class="pos-left-cols">
+          <select class="type-select public" onchange="updateType(this)">
+            <option value="public">공개</option>
+            <option value="direct">소싱</option>
+          </select>
+          <select class="status-select ongoing" onchange="updateStatus(this)">
+            <option value="ongoing">진행중</option>
+            <option value="done">완료</option>
+            <option value="pause">보류</option>
+            <option value="cancel">중단</option>
+          </select>
+        </div>
         <input type="text" class="pos-input" placeholder="팀 / 포지션 / 직급">
-        <select class="status-select ongoing" onchange="updateStatus(this)">
-          <option value="ongoing">진행중</option>
-          <option value="done">완료</option>
-          <option value="pause">보류</option>
-          <option value="cancel">중단</option>
-        </select>
       </div>
     </td>
-    <td><input type="date"></td>
+    <td>
+      <div class="date-container">
+        <input type="date" onchange="formatDateToDot(this)" onblur="formatDateToDot(this)">
+        <div class="date-text"></div>
+      </div>
+    </td>
     <td class="step-end">${unitInput('일')}</td>
     <td class="step-end">${unitInput('일')}</td>
     <td>${unitInput('명')}</td>
@@ -453,8 +702,16 @@ function addRow() {
     <td>${unitInput('%', {field:'int2-pass-rate', autoCalc:true})}</td>
     <td class="step-end">${unitInput('일')}</td>
     <td class="step-end">${unitInput('일')}</td>
-    <td class="step-end"><input type="date"></td>
-    <td class="note-cell"><textarea placeholder="특이사항 기재"></textarea></td>
+    <td class="step-end">
+      <div class="date-container">
+        <input type="date" onchange="formatDateToDot(this)" onblur="formatDateToDot(this)">
+        <div class="date-text"></div>
+      </div>
+    </td>
+    <td class="note-cell">
+      <textarea placeholder="특이사항 기재" oninput="syncTextarea(this)" onblur="syncTextarea(this)"></textarea>
+      <div class="print-note-text"></div>
+    </td>
     <td><button class="del-btn" onclick="delRow(this)">×</button></td>
   `;
   tbody.appendChild(tr);
@@ -488,6 +745,13 @@ function updateType(sel) {
   sel.className = "type-select " + sel.value;
 }
 
+function openPrintView() {
+  // 인쇄 명령 호출 직전 데이터 동기화 최적화
+  document.querySelectorAll('.date-container input[type="date"]').forEach(el => formatDateToDot(el));
+  document.querySelectorAll('.note-cell textarea').forEach(el => syncTextarea(el));
+  window.print();
+}
+
 function recalc(input) {
   const tr = input.closest("tr");
   const get = (name) => {
@@ -502,8 +766,8 @@ function recalc(input) {
   const docPass    = get("doc-pass");
   const int1Joined = get("int1-joined");
   const int1Pass   = get("int1-pass");
-  const int2Joined = get("int2-joined");
-  const int2Pass   = get("int2-pass");
+  const getInt2Joined = get("int2-joined");
+  const getInt2Pass   = get("int2-pass");
 
   if (docPass && docPass > 0 && int1Joined !== null) {
     set("int1-absent-rate", ((docPass - int1Joined) / docPass) * 100);
@@ -513,12 +777,12 @@ function recalc(input) {
     set("int1-pass-rate", (int1Pass / int1Joined) * 100);
   } else set("int1-pass-rate", null);
 
-  if (int1Pass && int1Pass > 0 && int2Joined !== null) {
-    set("int2-join-rate", (int2Joined / int1Pass) * 100);
+  if (int1Pass && int1Pass > 0 && getInt2Joined !== null) {
+    set("int2-join-rate", (getInt2Joined / int1Pass) * 100);
   } else set("int2-join-rate", null);
 
-  if (int2Joined && int2Joined > 0 && int2Pass !== null) {
-    set("int2-pass-rate", (int2Pass / int2Joined) * 100);
+  if (getInt2Joined && getInt2Joined > 0 && getInt2Pass !== null) {
+    set("int2-pass-rate", (getInt2Pass / getInt2Joined) * 100);
   } else set("int2-pass-rate", null);
 }
 
