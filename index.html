@@ -28,9 +28,9 @@
     align-items: center;
     margin-bottom: 15px;
   }
-  .table-title h2 { font-size: 16px; color: #1a2b4a; }
-  .title-actions { display: flex; gap: 8px; }
-  .add-row-btn, .print-btn {
+  .table-title h2 { font-size: 20px; color: #1a2b4a; cursor: pointer; user-select: none; }
+  .title-actions { display: flex; gap: 8px; align-items: center; }
+  .add-row-btn, .print-btn, .excel-btn {
     padding: 8px 16px;
     color: #fff;
     border: none;
@@ -43,6 +43,10 @@
   .add-row-btn:hover { background: #229954; }
   .print-btn { background: #34495e; }
   .print-btn:hover { background: #2c3e50; }
+  
+  /* 엑셀 버튼 초기 상태 숨김 */
+  .excel-btn { background: #1f7246; display: none; }
+  .excel-btn:hover { background: #154c2e; }
 
   table {
     width: 100%;
@@ -175,7 +179,7 @@
     width: 100%; 
   }
 
-  /* 포지션 셀 전체 가로 배치 구조 */
+  /* 포지션 셀 구조 */
   tbody td.position-cell {
     text-align: left;
     background: #f8fafc;
@@ -260,7 +264,7 @@
   .type-select.public { background: #2980b9 !important; }
   .type-select.direct { background: #8e44ad !important; }
 
-  /* 비고(특이사항) 컬럼 구조 */
+  /* 비고 컬럼 구조 */
   tbody td.note-cell {
     border-right: 2px solid #b0b9c1 !important;
     min-width: 120px;
@@ -350,186 +354,44 @@
 
   /* ===================== 프린트 전용 스타일 ===================== */
   @media print {
-    @page {
-      size: auto;
-      margin: 5mm 6mm;
-    }
-
+    @page { size: auto; margin: 5mm 6mm; }
     body {
-      background: #fff !important;
-      padding: 0 !important;
-      margin: 0 !important;
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
+      background: #fff !important; padding: 0 !important; margin: 0 !important;
+      -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important;
     }
-
-    /* 클래스 기반 비인쇄 요소 지정 */
-    .title-actions, .no-print {
-      display: none !important;
-    }
-
-    h1 {
-      font-size: 15pt;
-      margin: 0 0 4mm 0;
-    }
-
-    .table-wrap {
-      box-shadow: none !important;
-      border-radius: 0 !important;
-      padding: 0 !important;
-      overflow: visible !important;
-    }
+    .title-actions, .no-print { display: none !important; }
+    h1 { font-size: 15pt; margin: 0 0 4mm 0; }
+    .table-wrap { box-shadow: none !important; border-radius: 0 !important; padding: 0 !important; overflow: visible !important; }
     .table-title h2 { font-size: 11pt; }
-
-    table {
-      width: 100% !important;
-      min-width: 0 !important;
-      table-layout: auto !important; 
-      font-size: 7.5pt;
-      border: 1px solid #999;
-    }
-
+    table { width: 100% !important; min-width: 0 !important; table-layout: auto !important; font-size: 7.5pt; border: 1px solid #999; }
     thead { display: table-header-group; }
     tr { page-break-inside: avoid; }
-
-    thead tr.process-row th,
-    thead tr.sub-row th {
-      padding: 3px 1px !important;
-      font-size: 6.8pt !important;
-      white-space: normal;
-      border: 1px solid #999 !important;
-    }
-    .step-circle {
-      width: 14px; height: 14px;
-      line-height: 14px;
-      font-size: 7.5pt;
-      margin: 0 auto 1px;
-    }
-
-    tbody td {
-      padding: 2px 1px !important;
-      border: 1px solid #ccc !important;
-      vertical-align: middle;
-    }
-
-    tbody td.position-cell,
-    thead th.position-th {
-      position: static !important;
-      min-width: 155px !important; 
-      width: 155px !important;
-    }
-    thead th.position-th {
-      font-size: 8.5pt !important;
-      padding: 4px 2px !important;
-    }
-    tbody td.note-cell,
-    thead th.note-th {
-      min-width: 90px !important;
-      max-width: none !important;
-    }
-
-    .pos-row {
-      display: flex !important;
-      gap: 4px !important;
-      align-items: center !important;
-      width: 100% !important;
-    }
-    .pos-left-cols {
-      display: flex !important;
-      flex-direction: column !important;
-      gap: 1px !important;
-    }
-    .pos-row input.pos-input {
-      flex: 1 !important;
-      text-align: left !important;
-      display: inline-block !important;
-      width: auto !important;
-      border: none !important;
-      background: transparent !important;
-      padding: 0 !important;
-      font-size: 7.5pt !important;
-    }
-
-    tbody input, tbody select {
-      border: none !important;
-      background: transparent !important;
-      padding: 0 !important;
-      font-size: 7.5pt !important;
-      color: #000 !important;
-      width: 100% !important;
-    }
-
-    tbody input[type="date"] {
-      display: none !important;
-    }
-    .date-text {
-      display: block !important;
-      font-size: 7pt !important;
-      letter-spacing: -0.5px !important;
-    }
-
-    tbody td.note-cell textarea {
-      display: none !important;
-    }
-    .print-note-text {
-      display: block !important;
-      text-align: left !important;
-      font-size: 7pt !important;
-      white-space: pre-wrap !important;
-      word-break: break-all !important;
-      padding: 1px !important;
-      line-height: 1.2;
-    }
-
-    .input-with-unit {
-      display: inline-flex !important;
-      justify-content: center !important;
-      align-items: baseline !important;
-      width: auto !important;
-      white-space: nowrap !important;
-    }
-    .input-with-unit input { 
-      width: 20px !important; 
-      text-align: right !important;
-      display: inline-block !important;
-      font-size: 7.5pt !important;
-    }
-    .unit {
-      display: inline-block !important;
-      margin-left: 0.5px !important;
-      font-size: 6.8pt !important;
-    }
-
-    tbody input.auto-calc {
-      background: #f0f9f3 !important;
-      color: #1e8449 !important;
-    }
-    tbody input.auto-calc.warn {
-      background: #fdecea !important;
-      color: #c0392b !important;
-    }
-
-    .type-select, .status-select {
-      width: auto !important;
-      padding: 0px 2px !important;
-      font-size: 6.5pt !important;
-      display: inline-block !important;
-    }
-    .row-number {
-      width: 12px; height: 12px;
-      line-height: 12px;
-      font-size: 6.5pt;
-      display: inline-block !important;
-      flex: 0 0 12px !important;
-    }
-
+    thead tr.process-row th, thead tr.sub-row th { padding: 3px 1px !important; font-size: 6.8pt !important; white-space: normal; border: 1px solid #999 !important; }
+    .step-circle { width: 14px; height: 14px; line-height: 14px; font-size: 7.5pt; margin: 0 auto 1px; }
+    tbody td { padding: 2px 1px !important; border: 1px solid #ccc !important; vertical-align: middle; }
+    tbody td.position-cell, thead th.position-th { position: static !important; min-width: 155px !important; width: 155px !important; }
+    thead th.position-th { font-size: 8.5pt !important; padding: 4px 2px !important; }
+    tbody td.note-cell, thead th.note-th { min-width: 90px !important; max-width: none !important; }
+    .pos-row { display: flex !important; gap: 4px !important; align-items: center !important; width: 100% !important; }
+    .pos-left-cols { display: flex !important; flex-direction: column !important; gap: 1px !important; }
+    .pos-row input.pos-input { flex: 1 !important; text-align: left !important; display: inline-block !important; width: auto !important; border: none !important; background: transparent !important; padding: 0 !important; font-size: 7.5pt !important; }
+    tbody input, tbody select { border: none !important; background: transparent !important; padding: 0 !important; font-size: 7.5pt !important; color: #000 !important; width: 100% !important; }
+    tbody input[type="date"] { display: none !important; }
+    .date-text { display: block !important; font-size: 7pt !important; letter-spacing: -0.5px !important; }
+    tbody td.note-cell textarea { display: none !important; }
+    .print-note-text { display: block !important; text-align: left !important; font-size: 7pt !important; white-space: pre-wrap !important; word-break: break-all !important; padding: 1px !important; line-height: 1.2; }
+    .input-with-unit { display: inline-flex !important; justify-content: center !important; align-items: baseline !important; width: auto !important; white-space: nowrap !important; }
+    .input-with-unit input { width: 20px !important; text-align: right !important; display: inline-block !important; font-size: 7.5pt !important; }
+    .unit { display: inline-block !important; margin-left: 0.5px !important; font-size: 6.8pt !important; }
+    tbody input.auto-calc { background: #f0f9f3 !important; color: #1e8449 !important; }
+    tbody input.auto-calc.warn { background: #fdecea !important; color: #c0392b !important; }
+    .type-select, .status-select { width: auto !important; padding: 0px 2px !important; font-size: 6.5pt !important; display: inline-block !important; }
+    .row-number { width: 12px; height: 12px; line-height: 12px; font-size: 6.5pt; display: inline-block !important; flex: 0 0 12px !important; }
     .legend, footer { font-size: 7.5pt; }
     footer { border: none; margin-top: 5mm; }
   }
 
-  .print-note-text {
-    display: none;
-  }
+  .print-note-text { display: none; }
 </style>
 </head>
 <body>
@@ -538,8 +400,9 @@
 
 <div class="table-wrap">
   <div class="table-title">
-    <h2>포지션별 진행 현황</h2>
+    <h2 onclick="handleTitleClick()">포지션별 진행 현황</h2>
     <div class="title-actions">
+      <button id="excelBtn" class="excel-btn" onclick="exportToExcel()">Excel 다운로드</button>
       <button class="print-btn" onclick="openPrintView()">🖨 인쇄</button>
       <button class="add-row-btn" onclick="addRow()">+ 포지션 추가</button>
     </div>
@@ -550,8 +413,8 @@
       <tr class="process-row">
         <th class="position-th" rowspan="2">포지션 정보</th>
         <th colspan="1"><div class="step-circle c-jd">1</div>채용요청</th>
-        <th class="step-end" colspan="1"><div class="step-circle c-jd">2</div>JD 확정</th>
-        <th class="step-end" colspan="1"><div class="step-circle c-post">3</div>공고 게시/소싱</th>
+        <th class="step-end" colspan="1"><div class="step-circle c-jd">2</div>JD 검토·미팅</th>
+        <th class="step-end" colspan="1"><div class="step-circle c-post">3</div>공고 게시 / 소싱</th>
         <th class="step-end" colspan="2"><div class="step-circle c-doc">4</div>서류 검토</th>
         <th class="step-end" colspan="5"><div class="step-circle c-int1">5</div>1차 인터뷰</th>
         <th class="step-end" colspan="5"><div class="step-circle c-int2">6</div>2차 인터뷰</th>
@@ -584,15 +447,15 @@
   </table>
 
   <div class="legend">
-    <div class="legend-item"><span class="legend-badge" style="background:#2980b9;">공개</span>공고를 게시하는 공개적 채용</div>
-    <div class="legend-item"><span class="legend-badge" style="background:#8e44ad;">소싱</span>인재경영실 직접 소싱</div>
+    <div class="legend-item"><span class="legend-badge" style="background:#2980b9;">공개</span>채용공고를 게시하는 공개적 채용</div>
+    <div class="legend-item"><span class="legend-badge" style="background:#8e44ad;">소싱</span>직접 후보자를 발굴하는 채용</div>
     <div class="legend-item">&nbsp;|&nbsp;</div>
-    <div class="legend-item"><span class="legend-dot" style="background:#8e44ad;"></span>채용요청</div>
-    <div class="legend-item"><span class="legend-dot" style="background:#e74c3c;"></span>공고/소싱</div>
-    <div class="legend-item"><span class="legend-dot" style="background:#f39c12;"></span>서류</div>
-    <div class="legend-item"><span class="legend-dot" style="background:#2980b9;"></span>1차 인터뷰</div>
-    <div class="legend-item"><span class="legend-dot" style="background:#16a085;"></span>2차 인터뷰</div>
-    <div class="legend-item"><span class="legend-dot" style="background:#d4ac0d;"></span>최종/입사</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#8e44ad;"></span>채용의뢰 단계</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#e74c3c;"></span>공고/소싱 단계</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#f39c12;"></span>서류 단계</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#2980b9;"></span>1차 인터뷰 단계</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#16a085;"></span>2차 인터뷰 단계</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#d4ac0d;"></span>최종/입사 단계</div>
     <div class="legend-item">&nbsp;|&nbsp;</div>
     <div class="legend-item">
       <span class="legend-cell" style="background:#f0f9f3; border:1px solid #d4ebd9;"></span>
@@ -607,6 +470,91 @@
 </footer>
 
 <script>
+/* ===================== 히든 관리자 인증 기능 ===================== */
+let titleClickCount = 0;
+let titleClickTimer = null;
+const ADMIN_PASSWORD = '1055'; // 리크루터 본인만 사용할 비밀번호 설정
+
+function handleTitleClick() {
+  titleClickCount++;
+  if (titleClickCount === 1) {
+    titleClickTimer = setTimeout(() => { titleClickCount = 0; }, 1000);
+  } else if (titleClickCount === 3) {
+    clearTimeout(titleClickTimer);
+    titleClickCount = 0;
+    
+    const pwd = prompt("관리자 비밀번호를 입력하세요:");
+    if (pwd === ADMIN_PASSWORD) {
+      document.getElementById('excelBtn').style.display = 'inline-block';
+      alert("인증 성공: Excel 다운로드 기능이 활성화되었습니다.");
+    } else if (pwd !== null) {
+      alert("비밀번호가 올바르지 않습니다.");
+    }
+  }
+}
+
+/* ===================== CSV 기반 Excel 내보내기 로직 ===================== */
+function exportToExcel() {
+  const rows = document.querySelectorAll("#tbody tr");
+  if (rows.length === 0) {
+    alert("내보낼 데이터가 없습니다.");
+    return;
+  }
+
+  // 엑셀 가공을 원활하게 하기 위해 헤더 구조를 단일 평면 매핑 구조로 정의
+  let csvContent = "\uFEFF"; // Excel 한글 깨짐 방지 BOM 한 바이트 추가
+  csvContent += "No,구분,상태,팀/포지션/직급,요청일,JD검토 소요기간(일),공고/소싱 진행기간(일),서류 지원자수(명),서류 합격자수(명),1차 면접 참여자수(명),1차 면접 불참율(%),1차 면접 합격자수(명),1차 면접 합격율(%),1차 평균통보기간(일),2차 면접 참여자수(명),2차 면접 참여율(%),2차 면접 합격자수(명),2차 면접 합격율(%),2차 평균통보기간(일),최종 평균조율기간(일),입사(예정)일,비고\n";
+
+  rows.forEach(tr => {
+    const no = tr.querySelector(".row-number")?.textContent || "";
+    const typeSelect = tr.querySelector(".type-select");
+    const typeTxt = typeSelect ? typeSelect.options[typeSelect.selectedIndex].text : "";
+    const statusSelect = tr.querySelector(".status-select");
+    const statusTxt = statusSelect ? statusSelect.options[statusSelect.selectedIndex].text : "";
+    
+    const posInput = tr.querySelector(".pos-input")?.value || "";
+    
+    // 일반 인풋 정보 수집
+    const inputs = tr.querySelectorAll('input, textarea');
+    const dataRow = [no, typeTxt, statusTxt, posInput];
+
+    // 날짜 및 숫자 필드 순회하며 값 정제
+    let idx = 0;
+    inputs.forEach(inp => {
+      if (inp.classList.contains('pos-input')) return; // 이미 처리함
+
+      let val = inp.value;
+      if (inp.type === 'date' && val) {
+        val = val.replace(/-/g, '.'); // 2026-05-20 -> 2026.05.20 포맷 통일
+      }
+      
+      // 따옴표 및 개행문자 처리 (엑셀 셀 깨짐 방지)
+      val = val.replace(/"/g, '""');
+      if (val.includes(',') || val.includes('\n')) {
+        val = `"${val}"`;
+      }
+      dataRow.push(val);
+    });
+
+    csvContent += dataRow.join(",") + "\n";
+  });
+
+  // 다운로드 파일 생성 및 트리거
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  
+  // 파일명 포맷: 채용진행현황_20260520.csv
+  const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  link.setAttribute("href", url);
+  link.setAttribute("download", `채용진행현황_${today}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+/* ===================== 기존 내부 대시보드 인터랙션 로직 ===================== */
 function unitInput(unit, opts = {}) {
   const dataAttr = opts.field ? `data-field="${opts.field}"` : '';
   let cls = '';
@@ -623,15 +571,11 @@ function unitInput(unit, opts = {}) {
 }
 
 function blockMinus(e) {
-  if (e.key === "-" || e.key === "e" || e.key === "E" || e.key === "+") {
-    e.preventDefault();
-  }
+  if (e.key === "-" || e.key === "e" || e.key === "E" || e.key === "+") e.preventDefault();
 }
 function sanitizePaste(e) {
   const txt = (e.clipboardData || window.clipboardData).getData("text");
-  if (/^-/.test(txt) || parseFloat(txt) < 0) {
-    e.preventDefault();
-  }
+  if (/^-/.test(txt) || parseFloat(txt) < 0) e.preventDefault();
 }
 function clampNonNeg(input) {
   if (input.value !== "" && parseFloat(input.value) < 0) input.value = 0;
@@ -735,12 +679,8 @@ function renumber() {
   });
 }
 
-function updateStatus(sel) {
-  sel.className = "status-select " + sel.value;
-}
-function updateType(sel) {
-  sel.className = "type-select " + sel.value;
-}
+function updateStatus(sel) { sel.className = "status-select " + sel.value; }
+function updateType(sel) { sel.className = "type-select " + sel.value; }
 
 function openPrintView() {
   document.querySelectorAll('.date-container input[type="date"]').forEach(el => formatDateToDot(el));
