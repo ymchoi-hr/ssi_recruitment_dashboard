@@ -363,10 +363,8 @@
       print-color-adjust: exact !important;
     }
 
-    .title-actions, .del-btn, .add-row-btn, .print-btn {
-      display: none !important;
-    }
-    th:last-child, td:last-child {
+    /* 클래스 기반 비인쇄 요소 지정 */
+    .title-actions, .no-print {
       display: none !important;
     }
 
@@ -386,7 +384,7 @@
     table {
       width: 100% !important;
       min-width: 0 !important;
-      table-layout: auto !important; /* 종이폭에 맞추어 유기적으로 압축되도록 변경 */
+      table-layout: auto !important; 
       font-size: 7.5pt;
       border: 1px solid #999;
     }
@@ -414,7 +412,6 @@
       vertical-align: middle;
     }
 
-    /* 우측 내용 잘림을 방지하기 위해 포지션 칸의 최소 너비 최적 축소 */
     tbody td.position-cell,
     thead th.position-th {
       position: static !important;
@@ -471,7 +468,6 @@
       letter-spacing: -0.5px !important;
     }
 
-    /* 특이사항 자동 줄바꿈 전량 노출 */
     tbody td.note-cell textarea {
       display: none !important;
     }
@@ -554,15 +550,15 @@
       <tr class="process-row">
         <th class="position-th" rowspan="2">포지션 정보</th>
         <th colspan="1"><div class="step-circle c-jd">1</div>채용요청</th>
-        <th class="step-end" colspan="1"><div class="step-circle c-jd">2</div>JD 검토·미팅</th>
-        <th class="step-end" colspan="1"><div class="step-circle c-post">3</div>공고 게시 / 소싱</th>
+        <th class="step-end" colspan="1"><div class="step-circle c-jd">2</div>JD 확정</th>
+        <th class="step-end" colspan="1"><div class="step-circle c-post">3</div>공고 게시/소싱</th>
         <th class="step-end" colspan="2"><div class="step-circle c-doc">4</div>서류 검토</th>
         <th class="step-end" colspan="5"><div class="step-circle c-int1">5</div>1차 인터뷰</th>
         <th class="step-end" colspan="5"><div class="step-circle c-int2">6</div>2차 인터뷰</th>
         <th class="step-end" colspan="1"><div class="step-circle c-final">7</div>처우 조율</th>
         <th class="step-end" colspan="1"><div class="step-circle c-final">8</div>입사</th>
         <th class="note-th" rowspan="2">비고</th>
-        <th rowspan="2">삭제</th>
+        <th class="no-print" rowspan="2">삭제</th>
       </tr>
       <tr class="sub-row">
         <th>요청일</th>
@@ -588,8 +584,8 @@
   </table>
 
   <div class="legend">
-    <div class="legend-item"><span class="legend-badge" style="background:#2980b9;">공개</span>공개 채용</div>
-    <div class="legend-item"><span class="legend-badge" style="background:#8e44ad;">다이렉트</span>다이렉트 소싱</div>
+    <div class="legend-item"><span class="legend-badge" style="background:#2980b9;">공개</span>공고를 게시하는 공개적 채용</div>
+    <div class="legend-item"><span class="legend-badge" style="background:#8e44ad;">소싱</span>인재경영실 직접 소싱</div>
     <div class="legend-item">&nbsp;|&nbsp;</div>
     <div class="legend-item"><span class="legend-dot" style="background:#8e44ad;"></span>채용요청</div>
     <div class="legend-item"><span class="legend-dot" style="background:#e74c3c;"></span>공고/소싱</div>
@@ -713,7 +709,7 @@ function addRow() {
       <textarea placeholder="특이사항 기재" oninput="syncTextarea(this)" onblur="syncTextarea(this)"></textarea>
       <div class="print-note-text"></div>
     </td>
-    <td><button class="del-btn" onclick="delRow(this)">×</button></td>
+    <td class="no-print"><button class="del-btn" onclick="delRow(this)">×</button></td>
   `;
   tbody.appendChild(tr);
 
