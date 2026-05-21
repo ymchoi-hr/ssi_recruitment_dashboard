@@ -352,6 +352,9 @@
     border-top: 1px solid #e0e4e8;
   }
 
+  /* 프린트 전용 레이어 기본 숨김 */
+  .print-pos-text, .print-note-text { display: none; }
+
   /* ===================== 프린트 전용 스타일 ===================== */
   @media print {
     @page { size: auto; margin: 5mm 6mm; }
@@ -369,17 +372,35 @@
     thead tr.process-row th, thead tr.sub-row th { padding: 3px 1px !important; font-size: 6.8pt !important; white-space: normal; border: 1px solid #999 !important; }
     .step-circle { width: 14px; height: 14px; line-height: 14px; font-size: 7.5pt; margin: 0 auto 1px; }
     tbody td { padding: 2px 1px !important; border: 1px solid #ccc !important; vertical-align: middle; }
-    tbody td.position-cell, thead th.position-th { position: static !important; min-width: 155px !important; width: 155px !important; }
+    
+    /* 포지션 정보 셀 가변 및 강제 줄바꿈 제어 */
+    tbody td.position-cell, thead th.position-th { position: static !important; min-width: 165px !important; width: 165px !important; }
     thead th.position-th { font-size: 8.5pt !important; padding: 4px 2px !important; }
-    tbody td.note-cell, thead th.note-th { min-width: 90px !important; max-width: none !important; }
     .pos-row { display: flex !important; gap: 4px !important; align-items: center !important; width: 100% !important; }
     .pos-left-cols { display: flex !important; flex-direction: column !important; gap: 1px !important; }
-    .pos-row input.pos-input { flex: 1 !important; text-align: left !important; display: inline-block !important; width: auto !important; border: none !important; background: transparent !important; padding: 0 !important; font-size: 7.5pt !important; }
+    
+    /* 인쇄 시 포지션 인풋창을 숨기고 줄바꿈 가능 텍스트 레이어 노출 */
+    .pos-row input.pos-input { display: none !important; }
+    .print-pos-text { 
+      display: block !important; 
+      flex: 1 !important;
+      text-align: left !important; 
+      font-size: 7.5pt !important; 
+      font-weight: 500 !important;
+      white-space: pre-wrap !important; 
+      word-break: break-all !important; 
+      padding: 1px !important; 
+      line-height: 1.2; 
+    }
+
+    tbody td.note-cell, thead th.note-th { min-width: 90px !important; max-width: none !important; }
     tbody input, tbody select { border: none !important; background: transparent !important; padding: 0 !important; font-size: 7.5pt !important; color: #000 !important; width: 100% !important; }
     tbody input[type="date"] { display: none !important; }
     .date-text { display: block !important; font-size: 7pt !important; letter-spacing: -0.5px !important; }
+    
     tbody td.note-cell textarea { display: none !important; }
     .print-note-text { display: block !important; text-align: left !important; font-size: 7pt !important; white-space: pre-wrap !important; word-break: break-all !important; padding: 1px !important; line-height: 1.2; }
+    
     .input-with-unit { display: inline-flex !important; justify-content: center !important; align-items: baseline !important; width: auto !important; white-space: nowrap !important; }
     .input-with-unit input { width: 20px !important; text-align: right !important; display: inline-block !important; font-size: 7.5pt !important; }
     .unit { display: inline-block !important; margin-left: 0.5px !important; font-size: 6.8pt !important; }
@@ -390,8 +411,6 @@
     .legend, footer { font-size: 7.5pt; }
     footer { border: none; margin-top: 5mm; }
   }
-
-  .print-note-text { display: none; }
 </style>
 </head>
 <body>
@@ -470,7 +489,6 @@
 </footer>
 
 <script>
-
 let titleClickCount = 0;
 let titleClickTimer = null;
 const ADMIN_PASSWORD = '1055';
@@ -562,7 +580,8 @@ function loadDashboardData() {
               <option value="cancel" ${item.status === 'cancel' ? 'selected' : ''}>중단</option>
             </select>
           </div>
-          <input type="text" class="pos-input" placeholder="팀 / 포지션 / 직급" value="${item.posInput}" oninput="saveDashboardData()">
+          <input type="text" class="pos-input" placeholder="팀 / 포지션 / 직급" value="${item.posInput}" oninput="syncPosText(this); saveDashboardData()">
+          <div class="print-pos-text"></div>
         </div>
       </td>
       <td>
@@ -600,6 +619,7 @@ function loadDashboardData() {
     `;
     tbody.appendChild(tr);
 
+    tr.querySelectorAll('.pos-row input.pos-input').forEach(el => syncPosText(el));
     tr.querySelectorAll('.date-container input[type="date"]').forEach(el => formatDateToDot(el));
     tr.querySelectorAll('.note-cell textarea').forEach(el => syncTextarea(el));
 
@@ -646,12 +666,10 @@ function exportToExcel() {
     const statusTxt = statusSelect ? statusSelect.options[statusSelect.selectedIndex].text : "";
     const posInput = tr.querySelector(".pos-input")?.value || "";
     
-    const inputs = tr.querySelectorAll('input, textarea');
+    const inputs = tr.querySelectorAll('input[type="number"], input[type="date"], textarea');
     const dataRow = [no, typeTxt, statusTxt, posInput];
 
     inputs.forEach(inp => {
-      if (inp.classList.contains('pos-input')) return;
-
       let val = inp.value;
       if (inp.type === 'date' && val) {
         val = val.replace(/-/g, '.');
@@ -696,6 +714,12 @@ function clampNonNeg(input) {
   if (input.value !== "" && parseFloat(input.value) < 0) input.value = 0;
 }
 
+function syncPosText(el) {
+  const container = el.closest('.pos-row');
+  const printTxtEl = container.querySelector('.print-pos-text');
+  if(printTxtEl) printTxtEl.textContent = el.value;
+}
+
 function formatDateToDot(el) {
   const container = el.closest('.date-container');
   const txtEl = container.querySelector('.date-text');
@@ -712,7 +736,7 @@ function formatDateToDot(el) {
 function syncTextarea(el) {
   const container = el.closest('.note-cell');
   const printTxtEl = container.querySelector('.print-note-text');
-  printTxtEl.textContent = el.value;
+  if(printTxtEl) printTxtEl.textContent = el.value;
 }
 
 function addRow() {
@@ -734,7 +758,8 @@ function addRow() {
             <option value="cancel">중단</option>
           </select>
         </div>
-        <input type="text" class="pos-input" placeholder="팀 / 포지션 / 직급" oninput="saveDashboardData()">
+        <input type="text" class="pos-input" placeholder="팀 / 포지션 / 직급" oninput="syncPosText(this); saveDashboardData()">
+        <div class="print-pos-text"></div>
       </div>
     </td>
     <td>
@@ -800,6 +825,7 @@ function updateStatus(sel) { sel.className = "status-select " + sel.value; }
 function updateType(sel) { sel.className = "type-select " + sel.value; }
 
 function openPrintView() {
+  document.querySelectorAll('.pos-row input.pos-input').forEach(el => syncPosText(el));
   document.querySelectorAll('.date-container input[type="date"]').forEach(el => formatDateToDot(el));
   document.querySelectorAll('.note-cell textarea').forEach(el => syncTextarea(el));
   window.print();
@@ -842,7 +868,6 @@ function recalc(input) {
 }
 
 window.onload = function() {
-  // 매번 새로고침 시 인증 무조건 초기화 (localStorage 조회 제거)
   document.getElementById('excelBtn').style.display = 'none';
   loadDashboardData();
 };
