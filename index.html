@@ -98,7 +98,14 @@
     text-align: center;
     vertical-align: middle;
   }
+
+  /* 드래그 가능 행 스타일 */
+  tbody tr { cursor: grab; }
+  tbody tr:active { cursor: grabbing; }
+  tbody tr.dragging { opacity: 0.5; background: #e8f4fd; }
   tbody tr:hover { background: #fafbfc; }
+
+  tbody input, tbody select, tbody textarea { cursor: default; }
 
   tbody input, tbody select {
     border: 1px solid transparent;
@@ -221,6 +228,7 @@
     border-radius: 50%;
     font-size: 11px;
     font-weight: 600;
+    cursor: grab;
   }
   .pos-left-cols {
     display: flex;
@@ -373,13 +381,11 @@
     .step-circle { width: 14px; height: 14px; line-height: 14px; font-size: 7.5pt; margin: 0 auto 1px; }
     tbody td { padding: 2px 1px !important; border: 1px solid #ccc !important; vertical-align: middle; }
     
-    /* 포지션 정보 셀 가변 및 강제 줄바꿈 제어 */
     tbody td.position-cell, thead th.position-th { position: static !important; min-width: 165px !important; width: 165px !important; }
     thead th.position-th { font-size: 8.5pt !important; padding: 4px 2px !important; }
     .pos-row { display: flex !important; gap: 4px !important; align-items: center !important; width: 100% !important; }
     .pos-left-cols { display: flex !important; flex-direction: column !important; gap: 1px !important; }
     
-    /* 인쇄 시 포지션 인풋창을 숨기고 줄바꿈 가능 텍스트 레이어 노출 */
     .pos-row input.pos-input { display: none !important; }
     .print-pos-text { 
       display: block !important; 
@@ -564,6 +570,7 @@ function loadDashboardData() {
 
   data.forEach(item => {
     const tr = document.createElement("tr");
+    tr.setAttribute("draggable", "true"); // 드래그 활성화
     tr.innerHTML = `
       <td class="position-cell">
         <div class="pos-row">
@@ -627,6 +634,8 @@ function loadDashboardData() {
       inp.addEventListener("input", () => { clampNonNeg(inp); saveDashboardData(); });
       inp.addEventListener("change", () => { clampNonNeg(inp); saveDashboardData(); });
     });
+    
+    bindDragEvents(tr);
   });
 
   renumber();
@@ -698,7 +707,7 @@ function exportToExcel() {
   document.body.removeChild(link);
 }
 
-/* ===================== 기존 내부 대시보드 인터랙션 로직 ===================== */
+/* ===================== 대시보드 인터랙션 로직 ===================== */
 function unitInput(unit, opts = {}) {
   return unitInputWithVal(unit, "", opts);
 }
@@ -742,6 +751,7 @@ function syncTextarea(el) {
 function addRow() {
   const tbody = document.getElementById("tbody");
   const tr = document.createElement("tr");
+  tr.setAttribute("draggable", "true"); // 드래그 활성화
   tr.innerHTML = `
     <td class="position-cell">
       <div class="pos-row">
@@ -802,6 +812,7 @@ function addRow() {
     inp.addEventListener("change", () => { clampNonNeg(inp); saveDashboardData(); });
   });
 
+  bindDragEvents(tr);
   renumber();
   saveDashboardData();
 }
@@ -829,6 +840,50 @@ function openPrintView() {
   document.querySelectorAll('.date-container input[type="date"]').forEach(el => formatDateToDot(el));
   document.querySelectorAll('.note-cell textarea').forEach(el => syncTextarea(el));
   window.print();
+}
+
+/* ===================== 드래그 앤 드롭 정밀 로직 ===================== */
+let dragSrcEl = null;
+
+function bindDragEvents(row) {
+  row.addEventListener('dragstart', function(e) {
+    // 내부 입력값(인풋창 등)을 수정하다 삐져나온 드래그가 아닐 때만 작동하도록 방어
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') {
+      e.preventDefault();
+      return;
+    }
+    dragSrcEl = this;
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  });
+
+  row.addEventListener('dragend', function() {
+    this.classList.remove('dragging');
+    const rows = document.querySelectorAll("#tbody tr");
+    rows.forEach(r => r.classList.remove('dragging'));
+    renumber();
+    saveDashboardData(); // 순서 바뀐 직후 데이터 최종 보존
+  });
+
+  row.addEventListener('dragover', function(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    
+    const tbody = document.getElementById('tbody');
+    const bounding = this.getBoundingClientRect();
+    const offset = e.clientY - bounding.top;
+    
+    // 마우스 커서 위치에 따라 대상 행의 위/아래에 삽입되도록 정밀 스위칭
+    if (offset > bounding.height / 2) {
+      if (this.nextSibling) {
+        tbody.insertBefore(dragSrcEl, this.nextSibling);
+      } else {
+        tbody.appendChild(dragSrcEl);
+      }
+    } else {
+      tbody.insertBefore(dragSrcEl, this);
+    }
+  });
 }
 
 function recalc(input) {
