@@ -447,15 +447,15 @@
   </table>
 
   <div class="legend">
-    <div class="legend-item"><span class="legend-badge" style="background:#2980b9;">공개</span>채용공고를 게시하는 공개적 채용</div>
-    <div class="legend-item"><span class="legend-badge" style="background:#8e44ad;">소싱</span>직접 후보자를 발굴하는 채용</div>
+    <div class="legend-item"><span class="legend-badge" style="background:#2980b9;">공개</span>공개 채용</div>
+    <div class="legend-item"><span class="legend-badge" style="background:#8e44ad;">다이렉트</span>다이렉트 소싱</div>
     <div class="legend-item">&nbsp;|&nbsp;</div>
-    <div class="legend-item"><span class="legend-dot" style="background:#8e44ad;"></span>채용의뢰 단계</div>
-    <div class="legend-item"><span class="legend-dot" style="background:#e74c3c;"></span>공고/소싱 단계</div>
-    <div class="legend-item"><span class="legend-dot" style="background:#f39c12;"></span>서류 단계</div>
-    <div class="legend-item"><span class="legend-dot" style="background:#2980b9;"></span>1차 인터뷰 단계</div>
-    <div class="legend-item"><span class="legend-dot" style="background:#16a085;"></span>2차 인터뷰 단계</div>
-    <div class="legend-item"><span class="legend-dot" style="background:#d4ac0d;"></span>최종/입사 단계</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#8e44ad;"></span>채용요청</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#e74c3c;"></span>공고/소싱</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#f39c12;"></span>서류</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#2980b9;"></span>1차 인터뷰</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#16a085;"></span>2차 인터뷰</div>
+    <div class="legend-item"><span class="legend-dot" style="background:#d4ac0d;"></span>최종/입사</div>
     <div class="legend-item">&nbsp;|&nbsp;</div>
     <div class="legend-item">
       <span class="legend-cell" style="background:#f0f9f3; border:1px solid #d4ebd9;"></span>
@@ -470,10 +470,10 @@
 </footer>
 
 <script>
-/* ===================== 히든 관리자 인증 기능 ===================== */
+
 let titleClickCount = 0;
 let titleClickTimer = null;
-const ADMIN_PASSWORD = '1055'; // 리크루터 본인만 사용할 비밀번호 설정
+const ADMIN_PASSWORD = '1055';
 
 function handleTitleClick() {
   titleClickCount++;
@@ -486,11 +486,145 @@ function handleTitleClick() {
     const pwd = prompt("관리자 비밀번호를 입력하세요:");
     if (pwd === ADMIN_PASSWORD) {
       document.getElementById('excelBtn').style.display = 'inline-block';
-      alert("인증 성공: Excel 다운로드 기능이 활성화되었습니다.");
+      alert("인증 성공: Excel 다운로드 기능이 활성화되었습니다.\n(창을 닫거나 새로고침하면 다시 잠깁니다.)");
     } else if (pwd !== null) {
       alert("비밀번호가 올바르지 않습니다.");
     }
   }
+}
+
+/* ===================== 데이터 로컬 스토리지 실시간 자동 저장 처리 로직 ===================== */
+function saveDashboardData() {
+  const rows = document.querySelectorAll("#tbody tr");
+  const data = [];
+
+  rows.forEach(tr => {
+    const rowData = {
+      type: tr.querySelector(".type-select")?.value || "public",
+      status: tr.querySelector(".status-select")?.value || "ongoing",
+      posInput: tr.querySelector(".pos-input")?.value || "",
+      reqDate: tr.querySelectorAll('input[type="date"]')[0]?.value || "",
+      jdTerm: tr.querySelectorAll('input[type="number"]')[0]?.value || "",
+      postTerm: tr.querySelectorAll('input[type="number"]')[1]?.value || "",
+      docTotal: tr.querySelectorAll('input[type="number"]')[2]?.value || "",
+      docPass: tr.querySelector('[data-field="doc-pass"]')?.value || "",
+      int1Joined: tr.querySelector('[data-field="int1-joined"]')?.value || "",
+      int1AbsentRate: tr.querySelector('[data-field="int1-absent-rate"]')?.value || "",
+      int1Pass: tr.querySelector('[data-field="int1-pass"]')?.value || "",
+      int1PassRate: tr.querySelector('[data-field="int1-pass-rate"]')?.value || "",
+      int1Term: tr.querySelectorAll('input[type="number"]')[7]?.value || "",
+      int2Joined: tr.querySelector('[data-field="int2-joined"]')?.value || "",
+      int2JoinRate: tr.querySelector('[data-field="int2-join-rate"]')?.value || "",
+      int2Pass: tr.querySelector('[data-field="int2-pass"]')?.value || "",
+      int2PassRate: tr.querySelector('[data-field="int2-pass-rate"]')?.value || "",
+      int2Term: tr.querySelectorAll('input[type="number"]')[12]?.value || "",
+      finalTerm: tr.querySelectorAll('input[type="number"]')[13]?.value || "",
+      joinDate: tr.querySelectorAll('input[type="date"]')[1]?.value || "",
+      note: tr.querySelector(".note-cell textarea")?.value || ""
+    };
+    data.push(rowData);
+  });
+
+  localStorage.setItem("recruitment_dashboard_data", JSON.stringify(data));
+}
+
+function loadDashboardData() {
+  const rawData = localStorage.getItem("recruitment_dashboard_data");
+  if (!rawData) {
+    addRow(); 
+    return;
+  }
+
+  const data = JSON.parse(rawData);
+  if (data.length === 0) {
+    addRow();
+    return;
+  }
+
+  const tbody = document.getElementById("tbody");
+  tbody.innerHTML = ""; 
+
+  data.forEach(item => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td class="position-cell">
+        <div class="pos-row">
+          <span class="row-number"></span>
+          <div class="pos-left-cols">
+            <select class="type-select ${item.type}" onchange="updateType(this); saveDashboardData();">
+              <option value="public" ${item.type === 'public' ? 'selected' : ''}>공개</option>
+              <option value="direct" ${item.type === 'direct' ? 'selected' : ''}>다이렉트</option>
+            </select>
+            <select class="status-select ${item.status}" onchange="updateStatus(this); saveDashboardData();">
+              <option value="ongoing" ${item.status === 'ongoing' ? 'selected' : ''}>진행중</option>
+              <option value="done" ${item.status === 'done' ? 'selected' : ''}>완료</option>
+              <option value="pause" ${item.status === 'pause' ? 'selected' : ''}>보류</option>
+              <option value="cancel" ${item.status === 'cancel' ? 'selected' : ''}>중단</option>
+            </select>
+          </div>
+          <input type="text" class="pos-input" placeholder="팀 / 포지션 / 직급" value="${item.posInput}" oninput="saveDashboardData()">
+        </div>
+      </td>
+      <td>
+        <div class="date-container">
+          <input type="date" value="${item.reqDate}" onchange="formatDateToDot(this); saveDashboardData();" onblur="formatDateToDot(this)">
+          <div class="date-text"></div>
+        </div>
+      </td>
+      <td class="step-end">${unitInputWithVal('일', item.jdTerm)}</td>
+      <td class="step-end">${unitInputWithVal('일', item.postTerm)}</td>
+      <td>${unitInputWithVal('명', item.docTotal)}</td>
+      <td class="step-end">${unitInputWithVal('명', item.docPass, {field:'doc-pass'})}</td>
+      <td>${unitInputWithVal('명', item.int1Joined, {field:'int1-joined'})}</td>
+      <td>${unitInputWithVal('%', item.int1AbsentRate, {field:'int1-absent-rate', autoCalc:true, warn:true})}</td>
+      <td>${unitInputWithVal('명', item.int1Pass, {field:'int1-pass'})}</td>
+      <td>${unitInputWithVal('%', item.int1PassRate, {field:'int1-pass-rate', autoCalc:true})}</td>
+      <td class="step-end">${unitInputWithVal('일', item.int1Term)}</td>
+      <td>${unitInputWithVal('명', item.int2Joined, {field:'int2-joined'})}</td>
+      <td>${unitInputWithVal('%', item.int2JoinRate, {field:'int2-join-rate', autoCalc:true})}</td>
+      <td>${unitInputWithVal('명', item.int2Pass, {field:'int2-pass'})}</td>
+      <td>${unitInputWithVal('%', item.int2PassRate, {field:'int2-pass-rate', autoCalc:true})}</td>
+      <td class="step-end">${unitInputWithVal('일', item.int2Term)}</td>
+      <td class="step-end">${unitInputWithVal('일', item.finalTerm)}</td>
+      <td class="step-end">
+        <div class="date-container">
+          <input type="date" value="${item.joinDate}" onchange="formatDateToDot(this); saveDashboardData();" onblur="formatDateToDot(this)">
+          <div class="date-text"></div>
+        </div>
+      </td>
+      <td class="note-cell">
+        <textarea placeholder="특이사항 기재" oninput="syncTextarea(this); saveDashboardData();" onblur="syncTextarea(this)">${item.note}</textarea>
+        <div class="print-note-text"></div>
+      </td>
+      <td class="no-print"><button class="del-btn" onclick="delRow(this)">×</button></td>
+    `;
+    tbody.appendChild(tr);
+
+    tr.querySelectorAll('.date-container input[type="date"]').forEach(el => formatDateToDot(el));
+    tr.querySelectorAll('.note-cell textarea').forEach(el => syncTextarea(el));
+
+    tr.querySelectorAll('input[type="number"]').forEach(inp => {
+      inp.addEventListener("input", () => { clampNonNeg(inp); saveDashboardData(); });
+      inp.addEventListener("change", () => { clampNonNeg(inp); saveDashboardData(); });
+    });
+  });
+
+  renumber();
+}
+
+function unitInputWithVal(unit, val, opts = {}) {
+  const dataAttr = opts.field ? `data-field="${opts.field}"` : '';
+  let cls = '';
+  if (opts.autoCalc) cls += 'auto-calc ';
+  if (opts.warn) cls += 'warn ';
+  const readonly = opts.autoCalc ? 'readonly' : '';
+  const oninput = opts.field && !opts.autoCalc ? 'oninput="recalc(this)"' : '';
+  const minAttr = 'min="0"';
+  const onKey = `onkeydown="blockMinus(event)" onpaste="sanitizePaste(event)"`;
+  return `<span class="input-with-unit">
+    <input type="number" placeholder="0" value="${val}" class="${cls.trim()}" ${dataAttr} ${readonly} ${oninput} ${minAttr} ${onKey}>
+    <span class="unit">${unit}</span>
+  </span>`;
 }
 
 /* ===================== CSV 기반 Excel 내보내기 로직 ===================== */
@@ -501,8 +635,7 @@ function exportToExcel() {
     return;
   }
 
-  // 엑셀 가공을 원활하게 하기 위해 헤더 구조를 단일 평면 매핑 구조로 정의
-  let csvContent = "\uFEFF"; // Excel 한글 깨짐 방지 BOM 한 바이트 추가
+  let csvContent = "\uFEFF"; 
   csvContent += "No,구분,상태,팀/포지션/직급,요청일,JD검토 소요기간(일),공고/소싱 진행기간(일),서류 지원자수(명),서류 합격자수(명),1차 면접 참여자수(명),1차 면접 불참율(%),1차 면접 합격자수(명),1차 면접 합격율(%),1차 평균통보기간(일),2차 면접 참여자수(명),2차 면접 참여율(%),2차 면접 합격자수(명),2차 면접 합격율(%),2차 평균통보기간(일),최종 평균조율기간(일),입사(예정)일,비고\n";
 
   rows.forEach(tr => {
@@ -511,24 +644,19 @@ function exportToExcel() {
     const typeTxt = typeSelect ? typeSelect.options[typeSelect.selectedIndex].text : "";
     const statusSelect = tr.querySelector(".status-select");
     const statusTxt = statusSelect ? statusSelect.options[statusSelect.selectedIndex].text : "";
-    
     const posInput = tr.querySelector(".pos-input")?.value || "";
     
-    // 일반 인풋 정보 수집
     const inputs = tr.querySelectorAll('input, textarea');
     const dataRow = [no, typeTxt, statusTxt, posInput];
 
-    // 날짜 및 숫자 필드 순회하며 값 정제
-    let idx = 0;
     inputs.forEach(inp => {
-      if (inp.classList.contains('pos-input')) return; // 이미 처리함
+      if (inp.classList.contains('pos-input')) return;
 
       let val = inp.value;
       if (inp.type === 'date' && val) {
-        val = val.replace(/-/g, '.'); // 2026-05-20 -> 2026.05.20 포맷 통일
+        val = val.replace(/-/g, '.');
       }
       
-      // 따옴표 및 개행문자 처리 (엑셀 셀 깨짐 방지)
       val = val.replace(/"/g, '""');
       if (val.includes(',') || val.includes('\n')) {
         val = `"${val}"`;
@@ -539,12 +667,10 @@ function exportToExcel() {
     csvContent += dataRow.join(",") + "\n";
   });
 
-  // 다운로드 파일 생성 및 트리거
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
   const link = document.createElement("a");
   const url = URL.createObjectURL(blob);
   
-  // 파일명 포맷: 채용진행현황_20260520.csv
   const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
   link.setAttribute("href", url);
   link.setAttribute("download", `채용진행현황_${today}.csv`);
@@ -556,18 +682,7 @@ function exportToExcel() {
 
 /* ===================== 기존 내부 대시보드 인터랙션 로직 ===================== */
 function unitInput(unit, opts = {}) {
-  const dataAttr = opts.field ? `data-field="${opts.field}"` : '';
-  let cls = '';
-  if (opts.autoCalc) cls += 'auto-calc ';
-  if (opts.warn) cls += 'warn ';
-  const readonly = opts.autoCalc ? 'readonly' : '';
-  const oninput = opts.field && !opts.autoCalc ? 'oninput="recalc(this)"' : '';
-  const minAttr = 'min="0"';
-  const onKey = `onkeydown="blockMinus(event)" onpaste="sanitizePaste(event)"`;
-  return `<span class="input-with-unit">
-    <input type="number" placeholder="0" class="${cls.trim()}" ${dataAttr} ${readonly} ${oninput} ${minAttr} ${onKey}>
-    <span class="unit">${unit}</span>
-  </span>`;
+  return unitInputWithVal(unit, "", opts);
 }
 
 function blockMinus(e) {
@@ -608,23 +723,23 @@ function addRow() {
       <div class="pos-row">
         <span class="row-number"></span>
         <div class="pos-left-cols">
-          <select class="type-select public" onchange="updateType(this)">
+          <select class="type-select public" onchange="updateType(this); saveDashboardData();">
             <option value="public">공개</option>
             <option value="direct">다이렉트</option>
           </select>
-          <select class="status-select ongoing" onchange="updateStatus(this)">
+          <select class="status-select ongoing" onchange="updateStatus(this); saveDashboardData();">
             <option value="ongoing">진행중</option>
             <option value="done">완료</option>
             <option value="pause">보류</option>
             <option value="cancel">중단</option>
           </select>
         </div>
-        <input type="text" class="pos-input" placeholder="팀 / 포지션 / 직급">
+        <input type="text" class="pos-input" placeholder="팀 / 포지션 / 직급" oninput="saveDashboardData()">
       </div>
     </td>
     <td>
       <div class="date-container">
-        <input type="date" onchange="formatDateToDot(this)" onblur="formatDateToDot(this)">
+        <input type="date" onchange="formatDateToDot(this); saveDashboardData();" onblur="formatDateToDot(this)">
         <div class="date-text"></div>
       </div>
     </td>
@@ -645,12 +760,12 @@ function addRow() {
     <td class="step-end">${unitInput('일')}</td>
     <td class="step-end">
       <div class="date-container">
-        <input type="date" onchange="formatDateToDot(this)" onblur="formatDateToDot(this)">
+        <input type="date" onchange="formatDateToDot(this); saveDashboardData();" onblur="formatDateToDot(this)">
         <div class="date-text"></div>
       </div>
     </td>
     <td class="note-cell">
-      <textarea placeholder="특이사항 기재" oninput="syncTextarea(this)" onblur="syncTextarea(this)"></textarea>
+      <textarea placeholder="특이사항 기재" oninput="syncTextarea(this); saveDashboardData();" onblur="syncTextarea(this)"></textarea>
       <div class="print-note-text"></div>
     </td>
     <td class="no-print"><button class="del-btn" onclick="delRow(this)">×</button></td>
@@ -658,17 +773,19 @@ function addRow() {
   tbody.appendChild(tr);
 
   tr.querySelectorAll('input[type="number"]').forEach(inp => {
-    inp.addEventListener("input", () => clampNonNeg(inp));
-    inp.addEventListener("change", () => clampNonNeg(inp));
+    inp.addEventListener("input", () => { clampNonNeg(inp); saveDashboardData(); });
+    inp.addEventListener("change", () => { clampNonNeg(inp); saveDashboardData(); });
   });
 
   renumber();
+  saveDashboardData();
 }
 
 function delRow(btn) {
   if (!confirm("이 포지션을 삭제하시겠습니까?")) return;
   btn.closest("tr").remove();
   renumber();
+  saveDashboardData();
 }
 
 function renumber() {
@@ -720,9 +837,15 @@ function recalc(input) {
   if (getInt2Joined && getInt2Joined > 0 && getInt2Pass !== null) {
     set("int2-pass-rate", (getInt2Pass / getInt2Joined) * 100);
   } else set("int2-pass-rate", null);
+  
+  saveDashboardData(); 
 }
 
-addRow();
+window.onload = function() {
+  // 매번 새로고침 시 인증 무조건 초기화 (localStorage 조회 제거)
+  document.getElementById('excelBtn').style.display = 'none';
+  loadDashboardData();
+};
 </script>
 
 </body>
