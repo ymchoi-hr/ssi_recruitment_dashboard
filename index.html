@@ -528,21 +528,24 @@ function saveDashboardData() {
       status: tr.querySelector(".status-select")?.value || "ongoing",
       posInput: tr.querySelector(".pos-input")?.value || "",
       reqDate: tr.querySelectorAll('input[type="date"]')[0]?.value || "",
-      jdTerm: tr.querySelectorAll('input[type="number"]')[0]?.value || "",
-      postTerm: tr.querySelectorAll('input[type="number"]')[1]?.value || "",
-      docTotal: tr.querySelectorAll('input[type="number"]')[2]?.value || "",
+      
+      // 고유 data-field 속성을 직접 명시하여 데이터가 서로 뒤바뀌는 현상 완벽 방지
+      jdTerm: tr.querySelector('[data-field="jd-term"]')?.value || "",
+      postTerm: tr.querySelector('[data-field="post-term"]')?.value || "",
+      docTotal: tr.querySelector('[data-field="doc-total"]')?.value || "",
       docPass: tr.querySelector('[data-field="doc-pass"]')?.value || "",
       int1Joined: tr.querySelector('[data-field="int1-joined"]')?.value || "",
       int1AbsentRate: tr.querySelector('[data-field="int1-absent-rate"]')?.value || "",
       int1Pass: tr.querySelector('[data-field="int1-pass"]')?.value || "",
       int1PassRate: tr.querySelector('[data-field="int1-pass-rate"]')?.value || "",
-      int1Term: tr.querySelectorAll('input[type="number"]')[7]?.value || "",
+      int1Term: tr.querySelector('[data-field="int1-term"]')?.value || "",
       int2Joined: tr.querySelector('[data-field="int2-joined"]')?.value || "",
       int2JoinRate: tr.querySelector('[data-field="int2-join-rate"]')?.value || "",
       int2Pass: tr.querySelector('[data-field="int2-pass"]')?.value || "",
       int2PassRate: tr.querySelector('[data-field="int2-pass-rate"]')?.value || "",
-      int2Term: tr.querySelectorAll('input[type="number"]')[12]?.value || "",
-      finalTerm: tr.querySelectorAll('input[type="number"]')[13]?.value || "",
+      int2Term: tr.querySelector('[data-field="int2-term"]')?.value || "",
+      finalTerm: tr.querySelector('[data-field="final-term"]')?.value || "",
+      
       joinDate: tr.querySelectorAll('input[type="date"]')[1]?.value || "",
       note: tr.querySelector(".note-cell textarea")?.value || ""
     };
@@ -570,7 +573,7 @@ function loadDashboardData() {
 
   data.forEach(item => {
     const tr = document.createElement("tr");
-    tr.setAttribute("draggable", "true"); // 드래그 활성화
+    tr.setAttribute("draggable", "true");
     tr.innerHTML = `
       <td class="position-cell">
         <div class="pos-row">
@@ -597,21 +600,21 @@ function loadDashboardData() {
           <div class="date-text"></div>
         </div>
       </td>
-      <td class="step-end">${unitInputWithVal('일', item.jdTerm)}</td>
-      <td class="step-end">${unitInputWithVal('일', item.postTerm)}</td>
-      <td>${unitInputWithVal('명', item.docTotal)}</td>
+      <td class="step-end">${unitInputWithVal('일', item.jdTerm, {field:'jd-term'})}</td>
+      <td class="step-end">${unitInputWithVal('일', item.postTerm, {field:'post-term'})}</td>
+      <td>${unitInputWithVal('명', item.docTotal, {field:'doc-total'})}</td>
       <td class="step-end">${unitInputWithVal('명', item.docPass, {field:'doc-pass'})}</td>
       <td>${unitInputWithVal('명', item.int1Joined, {field:'int1-joined'})}</td>
       <td>${unitInputWithVal('%', item.int1AbsentRate, {field:'int1-absent-rate', autoCalc:true, warn:true})}</td>
       <td>${unitInputWithVal('명', item.int1Pass, {field:'int1-pass'})}</td>
       <td>${unitInputWithVal('%', item.int1PassRate, {field:'int1-pass-rate', autoCalc:true})}</td>
-      <td class="step-end">${unitInputWithVal('일', item.int1Term)}</td>
+      <td class="step-end">${unitInputWithVal('일', item.int1Term, {field:'int1-term'})}</td>
       <td>${unitInputWithVal('명', item.int2Joined, {field:'int2-joined'})}</td>
       <td>${unitInputWithVal('%', item.int2JoinRate, {field:'int2-join-rate', autoCalc:true})}</td>
       <td>${unitInputWithVal('명', item.int2Pass, {field:'int2-pass'})}</td>
       <td>${unitInputWithVal('%', item.int2PassRate, {field:'int2-pass-rate', autoCalc:true})}</td>
-      <td class="step-end">${unitInputWithVal('일', item.int2Term)}</td>
-      <td class="step-end">${unitInputWithVal('일', item.finalTerm)}</td>
+      <td class="step-end">${unitInputWithVal('일', item.int2Term, {field:'int2-term'})}</td>
+      <td class="step-end">${unitInputWithVal('일', item.finalTerm, {field:'final-term'})}</td>
       <td class="step-end">
         <div class="date-container">
           <input type="date" value="${item.joinDate}" onchange="formatDateToDot(this); saveDashboardData();" onblur="formatDateToDot(this)">
@@ -675,21 +678,31 @@ function exportToExcel() {
     const statusTxt = statusSelect ? statusSelect.options[statusSelect.selectedIndex].text : "";
     const posInput = tr.querySelector(".pos-input")?.value || "";
     
-    const inputs = tr.querySelectorAll('input[type="number"], input[type="date"], textarea');
+    const fields = ["jd-term", "post-term", "doc-total", "doc-pass", "int1-joined", "int1-absent-rate", "int1-pass", "int1-pass-rate", "int1-term", "int2-joined", "int2-join-rate", "int2-pass", "int2-pass-rate", "int2-term", "final-term"];
+    
     const dataRow = [no, typeTxt, statusTxt, posInput];
 
-    inputs.forEach(inp => {
-      let val = inp.value;
-      if (inp.type === 'date' && val) {
-        val = val.replace(/-/g, '.');
-      }
-      
-      val = val.replace(/"/g, '""');
-      if (val.includes(',') || val.includes('\n')) {
-        val = `"${val}"`;
-      }
-      dataRow.push(val);
+    const reqDateInp = tr.querySelectorAll('input[type="date"]')[0];
+    let reqDateVal = reqDateInp ? reqDateInp.value : "";
+    if (reqDateVal) reqDateVal = reqDateVal.replace(/-/g, '.');
+    dataRow.push(reqDateVal);
+
+    fields.forEach(f => {
+      const inp = tr.querySelector(`[data-field="${f}"]`);
+      dataRow.push(inp ? inp.value : "");
     });
+
+    const joinDateInp = tr.querySelectorAll('input[type="date"]')[1];
+    let joinDateVal = joinDateInp ? joinDateInp.value : "";
+    if (joinDateVal) joinDateVal = joinDateVal.replace(/-/g, '.');
+    dataRow.push(joinDateVal);
+
+    let noteVal = tr.querySelector(".note-cell textarea")?.value || "";
+    noteVal = noteVal.replace(/"/g, '""');
+    if (noteVal.includes(',') || noteVal.includes('\n')) {
+      noteVal = `"${noteVal}"`;
+    }
+    dataRow.push(noteVal);
 
     csvContent += dataRow.join(",") + "\n";
   });
@@ -751,7 +764,7 @@ function syncTextarea(el) {
 function addRow() {
   const tbody = document.getElementById("tbody");
   const tr = document.createElement("tr");
-  tr.setAttribute("draggable", "true"); // 드래그 활성화
+  tr.setAttribute("draggable", "true");
   tr.innerHTML = `
     <td class="position-cell">
       <div class="pos-row">
@@ -778,21 +791,21 @@ function addRow() {
         <div class="date-text"></div>
       </div>
     </td>
-    <td class="step-end">${unitInput('일')}</td>
-    <td class="step-end">${unitInput('일')}</td>
-    <td>${unitInput('명')}</td>
+    <td class="step-end">${unitInput('일', {field:'jd-term'})}</td>
+    <td class="step-end">${unitInput('일', {field:'post-term'})}</td>
+    <td>${unitInput('명', {field:'doc-total'})}</td>
     <td class="step-end">${unitInput('명', {field:'doc-pass'})}</td>
     <td>${unitInput('명', {field:'int1-joined'})}</td>
     <td>${unitInput('%', {field:'int1-absent-rate', autoCalc:true, warn:true})}</td>
     <td>${unitInput('명', {field:'int1-pass'})}</td>
     <td>${unitInput('%', {field:'int1-pass-rate', autoCalc:true})}</td>
-    <td class="step-end">${unitInput('일')}</td>
+    <td class="step-end">${unitInput('일', {field:'int1-term'})}</td>
     <td>${unitInput('명', {field:'int2-joined'})}</td>
     <td>${unitInput('%', {field:'int2-join-rate', autoCalc:true})}</td>
     <td>${unitInput('명', {field:'int2-pass'})}</td>
     <td>${unitInput('%', {field:'int2-pass-rate', autoCalc:true})}</td>
-    <td class="step-end">${unitInput('일')}</td>
-    <td class="step-end">${unitInput('일')}</td>
+    <td class="step-end">${unitInput('일', {field:'int2-term'})}</td>
+    <td class="step-end">${unitInput('일', {field:'final-term'})}</td>
     <td class="step-end">
       <div class="date-container">
         <input type="date" onchange="formatDateToDot(this); saveDashboardData();" onblur="formatDateToDot(this)">
@@ -847,7 +860,6 @@ let dragSrcEl = null;
 
 function bindDragEvents(row) {
   row.addEventListener('dragstart', function(e) {
-    // 내부 입력값(인풋창 등)을 수정하다 삐져나온 드래그가 아닐 때만 작동하도록 방어
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT' || e.target.tagName === 'TEXTAREA') {
       e.preventDefault();
       return;
@@ -862,7 +874,7 @@ function bindDragEvents(row) {
     const rows = document.querySelectorAll("#tbody tr");
     rows.forEach(r => r.classList.remove('dragging'));
     renumber();
-    saveDashboardData(); // 순서 바뀐 직후 데이터 최종 보존
+    saveDashboardData(); 
   });
 
   row.addEventListener('dragover', function(e) {
@@ -873,7 +885,6 @@ function bindDragEvents(row) {
     const bounding = this.getBoundingClientRect();
     const offset = e.clientY - bounding.top;
     
-    // 마우스 커서 위치에 따라 대상 행의 위/아래에 삽입되도록 정밀 스위칭
     if (offset > bounding.height / 2) {
       if (this.nextSibling) {
         tbody.insertBefore(dragSrcEl, this.nextSibling);
